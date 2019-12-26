@@ -18,7 +18,7 @@ With:
 
 	d_i^+: The number of deaths in the group Z > µ at the ith time
   
-  d_i^ : The total number of deaths at the ith time
+ 	d_i^ : The total number of deaths at the ith time
   
 	r_i^(*+): The number at risk in the group Z > µ at the ith time & the number of patients in the group Z> µ which had observed the competing event before the ith time.
   
