@@ -1,4 +1,5 @@
-
+# Cutoff-Gray_URC-Bichat
+# Determine an optimal cutpoint in presence of competing risks to categorize a continuous distribution.
 
 
 # Packages
@@ -66,8 +67,7 @@ cutoff.Gray <- function(bdd,delai.event,event,continuous.var,code.competing,code
         Q <- U/(s*sqrt(D-1))
         res[l,] <- c(lvwsi=quanti.cut[l],U,Q)
       }
-      
-      
+
       
       # Cutoff 
       print(res[res$Q==max(res$Q),])
