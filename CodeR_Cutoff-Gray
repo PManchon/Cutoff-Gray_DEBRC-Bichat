@@ -74,7 +74,7 @@ cutoff.Gray <- function(bdd,delai.event,event,continuous.var,code.competing,code
         s<- sqrt( (1/(D - 1)) * sum(sapply(1:D,function(i) (1 - sum(sapply(1:i,function(j) 1/(D+1-j))))^2)) )
         
         
-        # Gray Stat standardized (see README)
+        # Gray stat standardized (see README)
         
         Q <- U/(s*sqrt(D-1))
         res[l,] <- c(lvwsi=quanti.cut[l],U,Q)
