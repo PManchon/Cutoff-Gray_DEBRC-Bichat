@@ -8,30 +8,42 @@ require("survival")
 require("Hmisc")
 
 
+
+# Function parameters
+# ---------------------
+
+# bdd : the main database (For example: cirrhosis)
+# delai.event : the time to event (For example: "time")
+# event : Event observed at the time (For example: "outcome.event")
+# continuous.var : the continuous covariable to dichotomize (For example: "covariable")
+# code.competing : encoding of (For example: 2)
+# code.interest : encoding of (For example: 1)
+
+
 cutoff.Gray <- function(bdd,delai.event,event,continuous.var,code.competing,code.interest){
   
-  # Data frame contenant les variables utilisees
+  # Data frame containing the variables used
   data <- bdd[,c(delai.event, event, continuous.var)]
   names(data) <- c("delai", "outcome", "quanti.var")
   data <- data[order(data$delai,decreasing=F), ]
   
-  # Avertissement pour donnees manquantes
+  # Warning if missing data
   if( nrow(na.omit(data)) < nrow(data) ) {
     
     return(print("Warning: Missing data in database."))
     
   } else {
       
-      # Resultats avec Cox classique
+      # Results with Classical Cox regression
       data$event.cox <- ifelse(data$outcome==code.competing,0,data$outcome)
     
-      # Valeurs unique observees dans la distribution continue
+      # Unique values observed in continuous distribution
       quanti.cut <- unique(sort(data$quanti.var))
       
-      # Data-frame contenant les stat de de Gray standardisees pour chaque valeur unique
+      # Data-frame containing standardized Gray stat for each unique value
       res <- data.frame(quanti.val=quanti.cut,U=NA,Q=NA)
       
-      # Calcul les stat de de Gray standardisees pour chaque valeur unique observee 
+      # Calculation of standardized de Gray stat for each unique value observed 
       for(l in 1:length(quanti.cut)){
         
         data$quanti.bin <- ifelse(data$quanti.var<quanti.cut[l],0,1)
@@ -41,15 +53,15 @@ cutoff.Gray <- function(bdd,delai.event,event,continuous.var,code.competing,code
         D <- nrow(subset(data,outcome==code.interest))
         
         
-        # Calcul de U
+        # Calculation of U (See README)
         
         Score <- data.frame(time)
         
         for (i in 1:k){
           Score$d.i1_plus[i] <- sum(data$event.cox[data$delai==time[i] & data$quanti.bin==1])
           Score$d.i1[i] <- sum(data$event.cox[data$delai==time[i]])
-          Score$r.i1_plus[i] <- sum(data$delai>=time[i] & data$quanti.bin==1)+sum(data$delai<time[i] & data$quanti.bin==1 & data$outcome==2)
-          Score$r.i12[i] <- sum(data$delai>=time[i])+sum(data$delai<time[i] & data$outcome==2)
+          Score$r.i1_plus[i] <- sum(data$delai>=time[i] & data$quanti.bin==1)+sum(data$delai<time[i] & data$quanti.bin==1 & data$outcome==code.competing)
+          Score$r.i12[i] <- sum(data$delai>=time[i])+sum(data$delai<time[i] & data$outcome==code.competing)
         }
         
         Score$u <- Score$d.i1_plus-(Score$d.i1*(Score$r.i1_plus/Score$r.i12))
@@ -57,12 +69,12 @@ cutoff.Gray <- function(bdd,delai.event,event,continuous.var,code.competing,code
         U <- abs(sum(Score$u)) 
         
         
-        # Calcul de la Variance (s**2)
+        # Variance calculation (s**2, see README)
         
         s<- sqrt( (1/(D - 1)) * sum(sapply(1:D,function(i) (1 - sum(sapply(1:i,function(j) 1/(D+1-j))))^2)) )
         
         
-        #Stat de gray standardisée
+        # Standardized Gray Stat (see README)
         
         Q <- U/(s*sqrt(D-1))
         res[l,] <- c(lvwsi=quanti.cut[l],U,Q)
@@ -75,4 +87,4 @@ cutoff.Gray <- function(bdd,delai.event,event,continuous.var,code.competing,code
 }
 
 # For example
-cutoff.Gray(cirrhose,"survie","outcomelt","lvwsi",2,1)
+cutoff.Gray(cirrhosis,"time","outcome.event","covariable",2,1)
